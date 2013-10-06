@@ -19,16 +19,17 @@ def glob_files(source_dir, pattern):
 
 
 def transcode(filename):
-    output_filename = '%s.mp3' % filename
+    filename_no_ext = FROM_EXT.join(filename.split(FROM_EXT)[:-1])
+    output_filename = '%s.mp3' % filename_no_ext
+    print "transcoding %s --> %s" % (filename, output_filename)
     flac = subprocess.Popen(['flac', '--decode', '--stdout', filename], stdout=subprocess.PIPE)
     lame = subprocess.check_output(['lame', '--preset', 'extreme', '-', output_filename], stdin=flac.stdout)
     flac.wait()
 
 
 def main(source_dir, target_dir):
-    pattern = '*%s' % FROM_EXT
+    pattern = '*' + FROM_EXT
     for filename in glob_files(source_dir, pattern):
-        print "transcoding", filename
         transcode(filename)
 
 
