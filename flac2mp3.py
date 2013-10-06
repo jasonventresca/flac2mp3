@@ -19,15 +19,19 @@ def glob_files(source_dir, pattern):
 
 
 def transcode(filename):
+    # strip trailing '.flac' extension from source filename
     filename_no_ext = FROM_EXT.join(filename.split(FROM_EXT)[:-1])
-    output_filename = '%s.mp3' % filename_no_ext
+    # replace with '.mp3' extension
+    output_filename = '%s%s' % (filename_no_ext, TO_EXT)
+
+    # do the actual transcoding
     print "transcoding %s --> %s" % (filename, output_filename)
     flac = subprocess.Popen(['flac', '--decode', '--stdout', filename], stdout=subprocess.PIPE)
     lame = subprocess.check_output(['lame', '--preset', 'extreme', '-', output_filename], stdin=flac.stdout)
     flac.wait()
 
 
-def main(source_dir, target_dir):
+def main(source_dir):
     pattern = '*' + FROM_EXT
     for filename in glob_files(source_dir, pattern):
         transcode(filename)
@@ -37,8 +41,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='flac > mp3 transcoding utility')
     parser.add_argument('-s', '--source-dir', help='the top directory to find %s files' % FROM_EXT)
-    parser.add_argument('-t', '--target-dir', help='the directory to write transcoded files will be written')
     args = parser.parse_args()
 
-    main(args.source_dir, args.target_dir)
+    main(args.source_dir)
 
